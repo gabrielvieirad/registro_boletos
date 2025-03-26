@@ -1,89 +1,76 @@
-# 📘 Sistema de Registro e Controle de Boletos
+# Registro de Boletos
 
-Este é um sistema desenvolvido em Python com interface gráfica (Tkinter) para **cadastrar, buscar e gerenciar boletos** em planilhas Excel. Ele é ideal para pequenas empresas ou uso pessoal, permitindo organizar pagamentos por semestre, gerar parcelas automaticamente, controlar vencimentos e registrar quitações de forma prática.
+Aplicativo desenvolvido em Python com interface gráfica utilizando Tkinter para controle e registro de boletos diversos. Permite o cadastro, visualização, busca, baixa e controle de boletos parcelados, com armazenamento em planilhas Excel.
 
 ---
 
 ## ✅ Funcionalidades
 
-### 📋 Cadastro de Boletos
-- Seleção de tipos fixos: TINY, Linx, EDP, Aluguel, Vivo, Correios, SABESP, Boletos Faturados.
-- Inserção de:
-  - Data de emissão
-  - Data de vencimento
-  - Valor (com formatação `R$`)
-- Suporte a múltiplas parcelas (Boletos Faturados), com divisão automática de valores.
-- ID sequencial gerado automaticamente (`23`, `23-1`, `23-2`, etc).
-- Nome personalizado para Boletos Faturados.
-- Armazenamento em arquivos Excel separados por semestre (ex: `boletos_1sem_2025.xlsx`) e organizados por abas mensais (`Janeiro`, `Fevereiro`, etc).
-
-### 🔍 Busca de Boletos
-- Campo de busca por:
-  - Nome do boleto
-  - Data de vencimento
-  - ID do boleto (ex: `23`, `23-1`)
-- Se a busca for deixada em branco, exibe **todos os boletos cadastrados**.
-
-### ✅ Dar Baixa em Boletos
-- Seleção de boleto e alteração do status para **"Pago"**.
-- Registro automático da data de baixa.
-- Baixa feita com **precisão de origem** (arquivo + mês) para evitar conflitos entre meses e semestres.
+- Cadastro de boletos com tipo, data de emissão, vencimento e valor.
+- Suporte a boletos parcelados com controle individual de vencimentos.
+- Interface dinâmica: campos exibidos de acordo com o tipo de boleto selecionado.
+- Busca por ID, nome ou data de vencimento.
+- Marcação de boletos como pagos diretamente pela interface.
+- Armazenamento em planilhas organizadas por semestre e mês de vencimento.
 
 ---
 
-## ⚙️ Tecnologias Utilizadas
+## 🖥️ Interface Gráfica
+
+- Layout redesenhado com alinhamento consistente e responsivo.
+- Janela principal centralizada automaticamente na tela, com ajuste para não sobrepor a barra de tarefas.
+- Todos os campos organizados com espaçamento visual adequado.
+- O botão "Dar Baixa no Boleto Selecionado" permanece sempre visível, sem necessidade de redimensionar a janela.
+- Campos "Nome do Boleto" e "Nº Parcelas" são exibidos apenas quando o tipo selecionado for "Boletos Faturados".
+- Formatação automática de datas: aceita formatos como `01012025`, `01/01/2025`, `01.01.2025`.
+- Navegação com a tecla Enter entre campos, com formatação automática aplicada nos campos de data.
+
+---
+
+## 📁 Armazenamento dos Dados
+
+- Boletos são salvos em planilhas Excel, com separação por semestre e mês de vencimento.
+- Para boletos parcelados, cada parcela possui vencimento próprio.
+- Os dados são distribuídos automaticamente nas abas correspondentes.
+- IDs são únicos por planilha e controlados sequencialmente.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
 
 - Python 3.12+
 - Tkinter (interface gráfica)
-- Pandas + OpenPyXL (para manipulação de planilhas Excel)
+- Pandas (manipulação de planilhas)
+- openpyxl (leitura e escrita em arquivos Excel)
 
 ---
 
-## 📂 Estrutura do Projeto
+## 🚀 Execução
 
-```
-📁 registro_boletos/
-├── main.py                 # Executa o sistema
-├── interface.py            # Interface Tkinter
-├── excel_utils.py          # Lógica de leitura e escrita em Excel
-├── format_utils.py         # Tratamento de datas e valores
-├── config.py               # Lista de tipos de boletos
-├── boletos_1sem_2025.xlsx  # (Exemplo gerado) Planilha com boletos
-```
+Para iniciar a aplicação:
 
----
-
-## ⚠️ Dificuldades e Soluções
-
-### 🔁 IDs duplicados entre meses/semestres
-- IDs numéricos podem se repetir, por isso implementamos:
-  - **Mapeamento completo** entre `ID + mês + arquivo`
-  - A função `dar_baixa` atua com precisão no local correto
-
-### 📆 Formato de datas flexível
-- O sistema aceita `01/02/2025`, `01.02.2025` ou `01022025`, padronizando internamente para `DD/MM/AAAA`.
-
-### 📊 Interface Tkinter
-- Evitamos conflitos entre `pack()` e `grid()` ao refatorar o layout para usar `grid()` consistentemente.
-
-### 🔄 Pesquisa exibida diretamente na interface
-- Removemos prints no terminal e implementamos `Treeview` com carregamento dinâmico e responsivo.
-
----
-
-## 🚀 Como Executar
-
-1. Instale as dependências:
-```bash
-pip install pandas openpyxl
-```
-
-2. Execute o sistema:
 ```bash
 python main.py
 ```
 
 ---
 
-## 📅 Última atualização
-25/03/2025
+## 📌 Requisitos
+
+- Python 3.12 ou superior instalado
+- Bibliotecas: `pandas`, `openpyxl`
+
+Você pode instalar as dependências com:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 📎 Observações
+
+- O projeto é modular e permite expansão futura para controle de outros documentos financeiros.
+- Interface pensada para uso contínuo, com foco em usabilidade, clareza visual e estabilidade.
+
+---
