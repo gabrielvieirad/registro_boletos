@@ -8,6 +8,7 @@ from format_utils import (
 )
 from tkinter import messagebox
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 def obter_semestre(data):
     mes = data.month
@@ -83,11 +84,12 @@ def salvar_boletos(nome, emissao_str, vencimento_str, valor_str, parcelas_str):
             df_final = df_novo
 
         modo = "a" if os.path.exists(arquivo) else "w"
-        if modo == "a":
-            with pd.ExcelWriter(arquivo, engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
-                df_final.to_excel(writer, sheet_name=nome_mes, index=False)
-        else:
-            with pd.ExcelWriter(arquivo, engine="openpyxl") as writer:
+        with pd.ExcelWriter(
+            arquivo,
+            engine="openpyxl",
+            mode=modo,
+            if_sheet_exists="replace" if modo == "a" else None
+        ) as writer:
                 df_final.to_excel(writer, sheet_name=nome_mes, index=False)
 
         messagebox.showinfo("Sucesso", "Boleto(s) salvo(s) com sucesso!")
@@ -142,3 +144,76 @@ def dar_baixa(id_boleto, arquivo, aba):
     except Exception as e:
         print(f"Erro ao dar baixa: {e}")
         return False
+
+def salvar_boletos_personalizado(nome, data_emissao, valor_total, vencimentos):
+    try:
+        data_emissao = normalizar_data(data_emissao)
+        vencimentos_normalizados = [normalizar_data(v) for v in vencimentos]
+
+        num_parcelas = len(vencimentos_normalizados)
+        valor_parcela = round(float(valor_total) / num_parcelas, 2)
+        valor_parcela_formatado = formatar_valor_str(valor_parcela)
+
+        registros_por_arquivo = {}
+
+        # ID base = número sequencial, único por planilha
+        for i, vencimento in enumerate(vencimentos_normalizados, start=1):
+            semestre = f"{'1sem' if vencimento.month <= 6 else '2sem'}_{vencimento.year}"
+            arquivo = f"boletos_{semestre}.xlsx"
+            aba = vencimento.strftime("%B").capitalize()
+
+            # Inicializa lista do arquivo, se ainda não tiver
+            if arquivo not in registros_por_arquivo:
+                registros_por_arquivo[arquivo] = {}
+
+            if aba not in registros_por_arquivo[arquivo]:
+                registros_por_arquivo[arquivo][aba] = []
+
+        # Obter ID base (usando o primeiro vencimento como referência)
+        venc_base = vencimentos_normalizados[0]
+        semestre_base = f"{'1sem' if venc_base.month <= 6 else '2sem'}_{venc_base.year}"
+        arquivo_base = f"boletos_{semestre_base}.xlsx"
+        aba_base = venc_base.strftime("%B").capitalize()
+        id_base = obter_proximo_id(arquivo_base, aba_base)
+
+        # Criar registros
+        for i, vencimento in enumerate(vencimentos_normalizados, start=1):
+            semestre = f"{'1sem' if vencimento.month <= 6 else '2sem'}_{vencimento.year}"
+            arquivo = f"boletos_{semestre}.xlsx"
+            aba = vencimento.strftime("%B").capitalize()
+
+            registro = {
+                "ID": f"{id_base}-{i}",
+                "Nome": nome,
+                "Emissão": formatar_data(data_emissao),
+                "Vencimento": formatar_data(vencimento),
+                "Valor": valor_parcela_formatado,
+                "Status": "Em Aberto",
+                "Data de Baixa": "",
+                "Parcela": f"{i}/{num_parcelas}"
+            }
+
+            registros_por_arquivo[arquivo][aba].append(registro)
+
+        # Salvar cada grupo de registros por arquivo/aba
+        for arquivo, abas in registros_por_arquivo.items():
+            modo = "a" if os.path.exists(arquivo) else "w"
+            with pd.ExcelWriter(arquivo, engine="openpyxl", mode=modo, if_sheet_exists="replace") as writer:
+                for aba, registros in abas.items():
+                    df_novo = pd.DataFrame(registros)
+
+                    try:
+                        if os.path.exists(arquivo):
+                            df_existente = pd.read_excel(arquivo, sheet_name=aba)
+                            df_final = pd.concat([df_existente, df_novo], ignore_index=True)
+                        else:
+                            df_final = df_novo
+                    except:
+                        df_final = df_novo
+
+                    df_final.to_excel(writer, sheet_name=aba, index=False)
+
+        messagebox.showinfo("Sucesso", "Parcelas salvas com sucesso!")
+
+    except Exception as e:
+        messagebox.showerror("Erro", f"Erro ao salvar parcelas:\n{str(e)}")
