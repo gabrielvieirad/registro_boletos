@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pandas as pd
 from format_utils import (
     formatar_data,
@@ -31,7 +32,23 @@ def obter_proximo_id(arquivo, aba):
             return 1
     return 1
 
-def salvar_boletos(nome, emissao_str, vencimento_str, valor_str, parcelas_str):
+def salvar_boletos(nome, emissao_str, vencimento_str, valor_str, parcelas_str="", editar_id=None, arquivo_origem=None, aba_origem=None):
+    if editar_id and arquivo_origem and aba_origem:
+        try:
+            df = pd.read_excel(arquivo_origem, sheet_name=aba_origem)
+            df.loc[df["ID"].astype(str) == str(editar_id), ["Nome", "Emissão", "Vencimento", "Valor"]] = [
+                nome,
+                formatar_data(normalizar_data(emissao_str)),
+                formatar_data(normalizar_data(vencimento_str)),
+                formatar_valor_str(formatar_valor(valor_str))
+            ]
+            with pd.ExcelWriter(arquivo_origem, engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
+                df.to_excel(writer, sheet_name=aba_origem, index=False)
+            return True
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao salvar edição:\n{str(e)}")
+            return False
+
     try:
         data_emissao = normalizar_data(emissao_str)
         data_vencimento = normalizar_data(vencimento_str)
@@ -39,7 +56,8 @@ def salvar_boletos(nome, emissao_str, vencimento_str, valor_str, parcelas_str):
         valor_formatado = formatar_valor_str(valor_total)
         semestre = obter_semestre(data_emissao)
         nome_mes = obter_nome_mes(data_emissao)
-        arquivo = f"boletos_{semestre}.xlsx"
+        arquivo = obter_caminho_arquivo(semestre)
+
 
         id_base = obter_proximo_id(arquivo, nome_mes)
         registros = []
@@ -90,7 +108,7 @@ def salvar_boletos(nome, emissao_str, vencimento_str, valor_str, parcelas_str):
             mode=modo,
             if_sheet_exists="replace" if modo == "a" else None
         ) as writer:
-                df_final.to_excel(writer, sheet_name=nome_mes, index=False)
+            df_final.to_excel(writer, sheet_name=nome_mes, index=False)
 
         messagebox.showinfo("Sucesso", "Boleto(s) salvo(s) com sucesso!")
 
@@ -145,6 +163,12 @@ def dar_baixa(id_boleto, arquivo, aba):
         print(f"Erro ao dar baixa: {e}")
         return False
 
+def obter_caminho_arquivo(semestre):
+    desktop = Path.home() / "Desktop"
+    pasta_destino = desktop / "Boletos_Registrados"
+    pasta_destino.mkdir(exist_ok=True)
+    return str(pasta_destino / f"boletos_{semestre}.xlsx")
+
 def salvar_boletos_personalizado(nome, data_emissao, valor_total, vencimentos):
     try:
         data_emissao = normalizar_data(data_emissao)
@@ -159,7 +183,7 @@ def salvar_boletos_personalizado(nome, data_emissao, valor_total, vencimentos):
         # ID base = número sequencial, único por planilha
         for i, vencimento in enumerate(vencimentos_normalizados, start=1):
             semestre = f"{'1sem' if vencimento.month <= 6 else '2sem'}_{vencimento.year}"
-            arquivo = f"boletos_{semestre}.xlsx"
+            arquivo = obter_caminho_arquivo(semestre)
             aba = vencimento.strftime("%B").capitalize()
 
             # Inicializa lista do arquivo, se ainda não tiver
@@ -179,7 +203,7 @@ def salvar_boletos_personalizado(nome, data_emissao, valor_total, vencimentos):
         # Criar registros
         for i, vencimento in enumerate(vencimentos_normalizados, start=1):
             semestre = f"{'1sem' if vencimento.month <= 6 else '2sem'}_{vencimento.year}"
-            arquivo = f"boletos_{semestre}.xlsx"
+            arquivo = obter_caminho_arquivo(semestre)
             aba = vencimento.strftime("%B").capitalize()
 
             registro = {

@@ -12,6 +12,8 @@ Aplicativo desenvolvido em Python com interface gráfica utilizando Tkinter para
 - Busca por ID, nome ou data de vencimento.
 - Marcação de boletos como pagos diretamente pela interface.
 - Armazenamento em planilhas organizadas por semestre e mês de vencimento.
+- Com salvamento automático na Área de Trabalho!
+
 
 ---
 
@@ -29,10 +31,11 @@ Aplicativo desenvolvido em Python com interface gráfica utilizando Tkinter para
 
 ## 📁 Armazenamento dos Dados
 
-- Boletos são salvos em planilhas Excel, com separação por semestre e mês de vencimento.
-- Para boletos parcelados, cada parcela possui vencimento próprio.
-- Os dados são distribuídos automaticamente nas abas correspondentes.
-- IDs são únicos por planilha e controlados sequencialmente.
+- Todos os boletos são armazenados em arquivos Excel organizados por semestre e mês de vencimento.
+- Os arquivos são salvos automaticamente em uma pasta `Boletos_Registrados`, criada na Área de Trabalho do sistema.
+- Para boletos parcelados, cada parcela possui vencimento próprio, com controle individual.
+- IDs são únicos por planilha, com rastreabilidade mantida mesmo entre meses e semestres.
+
 
 ---
 
