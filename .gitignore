@@ -1,9 +1,17 @@
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-*.pyd
-*.log
-.env
-*.xlsx
+
+# Pastas de build e distribuição
+build/
+dist/
+*.spec
+
+# IDEs e SO
+.vscode/
+.idea/
 .DS_Store
-*.db
+Thumbs.db
+
+# Arquivos de log ou temporários
+*.log

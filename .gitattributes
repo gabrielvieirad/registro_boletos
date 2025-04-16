@@ -1,0 +1,10 @@
+# Força a linguagem Python
+*.py linguist-language=Python
+
+# Ignora arquivos de build que confundem a detecção
+build/** linguist-vendored
+dist/** linguist-vendored
+*.toc linguist-vendored
+*.pyz linguist-vendored
+*.zip linguist-vendored
+*.html linguist-vendored
